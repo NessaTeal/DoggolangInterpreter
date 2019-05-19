@@ -22,6 +22,10 @@ public class ExpressionParser {
         return element;
     }
 
+    private void skipElement() {
+        currentPosition++;
+    }
+
     private Token peekNextElement() {
         return tokens.get(currentPosition);
     }
@@ -83,7 +87,7 @@ public class ExpressionParser {
                 ifBody.add(ifBodyParser.getNextExpression());
             }
 
-            getNextElement(tokenStream);
+            skipElement();
 
             List<Token> elseBodyTokenStream = new ArrayList<>();
 
@@ -101,7 +105,7 @@ public class ExpressionParser {
                 elseBody.add(elseBodyParser.getNextExpression());
             }
 
-            getNextElement(tokenStream);
+            skipElement();
 
             return new IfExpression(predicateExpression, ifBody, elseBody);
         } else if (nextElement.getTokenType() == TokenType.WHILE) {
@@ -133,7 +137,7 @@ public class ExpressionParser {
                 body.add(bodyParser.getNextExpression());
             }
 
-            getNextElement(tokenStream);
+            skipElement();
 
             return new WhileExpression(predicateExpression, body);
         }
