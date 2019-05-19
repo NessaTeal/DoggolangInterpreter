@@ -62,17 +62,10 @@ public class ExpressionParser {
     }
 
     private IfExpression parseIfExpression() {
-        List<Token> predicateTokenStream = new ArrayList<>();
-
-        getNextToken(predicateTokenStream);
-        getNextToken(predicateTokenStream);
-        getNextToken(predicateTokenStream);
-
+        PredicateExpression predicateExpression = parsePredicateExpression();
         if (getNextToken().getTokenType() != TokenType.THEN_IF) {
             throw new IllegalArgumentException();
         }
-
-        PredicateExpression predicateExpression = new PredicateExpression(predicateTokenStream);
 
         List<Token> ifBodyTokenStream = new ArrayList<>();
 
@@ -114,17 +107,10 @@ public class ExpressionParser {
     }
 
     private WhileExpression parseWhileExpression() {
-        List<Token> predicateTokenStream = new ArrayList<>();
-
-        getNextToken(predicateTokenStream);
-        getNextToken(predicateTokenStream);
-        getNextToken(predicateTokenStream);
-
+        PredicateExpression predicateExpression = parsePredicateExpression();
         if (getNextToken().getTokenType() != TokenType.THEN_WHILE) {
             throw new IllegalArgumentException();
         }
-
-        PredicateExpression predicateExpression = new PredicateExpression(predicateTokenStream);
 
         List<Token> bodyTokenStream = new ArrayList<>();
 
@@ -145,6 +131,16 @@ public class ExpressionParser {
         skipElement();
 
         return new WhileExpression(predicateExpression, body);
+    }
+
+    private PredicateExpression parsePredicateExpression() {
+        List<Token> predicateExpressionTokens = new ArrayList<>();
+
+        getNextToken(predicateExpressionTokens);
+        getNextToken(predicateExpressionTokens);
+        getNextToken(predicateExpressionTokens);
+
+        return new PredicateExpression(predicateExpressionTokens);
     }
 
     public Expression getNextExpression() {
