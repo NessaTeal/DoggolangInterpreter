@@ -22,6 +22,12 @@ public class ExpressionParser {
         return element;
     }
 
+    private Token getNextElement() {
+        Token element = tokens.get(currentPosition);
+        currentPosition++;
+        return element;
+    }
+
     private void skipElement() {
         currentPosition++;
     }
