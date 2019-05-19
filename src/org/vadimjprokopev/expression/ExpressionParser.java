@@ -15,14 +15,14 @@ public class ExpressionParser {
         this.tokens = tokens;
     }
 
-    private Token getNextElement(List<Token> body) {
+    private Token getNextToken(List<Token> body) {
         Token element = tokens.get(currentPosition);
         body.add(element);
         currentPosition++;
         return element;
     }
 
-    private Token getNextElement() {
+    private Token getNextToken() {
         Token element = tokens.get(currentPosition);
         currentPosition++;
         return element;
@@ -41,14 +41,14 @@ public class ExpressionParser {
     }
 
     private SetExpression parseSetExpression(List<Token> tokenStream) {
-        getNextElement(tokenStream);
-        getNextElement(tokenStream);
+        getNextToken(tokenStream);
+        getNextToken(tokenStream);
 
         if (peekNextElement().getTokenType() == TokenType.ADD
                 || peekNextElement().getTokenType() == TokenType.SUBTRACT
                 || peekNextElement().getTokenType() == TokenType.MULTIPLY) {
-            getNextElement(tokenStream);
-            getNextElement(tokenStream);
+            getNextToken(tokenStream);
+            getNextToken(tokenStream);
 
             ArithmeticExpression arithmeticExpression = new ArithmeticExpression(tokenStream.subList(2, 5));
             return new SetExpression(tokenStream.get(0), arithmeticExpression);
@@ -61,11 +61,11 @@ public class ExpressionParser {
     private IfExpression parseIfExpression() {
         List<Token> predicateTokenStream = new ArrayList<>();
 
-        getNextElement(predicateTokenStream);
-        getNextElement(predicateTokenStream);
-        getNextElement(predicateTokenStream);
+        getNextToken(predicateTokenStream);
+        getNextToken(predicateTokenStream);
+        getNextToken(predicateTokenStream);
 
-        if (getNextElement().getTokenType() != TokenType.THEN_IF) {
+        if (getNextToken().getTokenType() != TokenType.THEN_IF) {
             throw new IllegalArgumentException();
         }
 
@@ -74,7 +74,7 @@ public class ExpressionParser {
         List<Token> ifBodyTokenStream = new ArrayList<>();
 
         while (peekNextElement().getTokenType() != TokenType.ELSE) {
-            getNextElement(ifBodyTokenStream);
+            getNextToken(ifBodyTokenStream);
         }
 
         ifBodyTokenStream.add(new Token(TokenType.EOF, null, null));
@@ -92,7 +92,7 @@ public class ExpressionParser {
         List<Token> elseBodyTokenStream = new ArrayList<>();
 
         while (peekNextElement().getTokenType() != TokenType.END_IF) {
-            getNextElement(elseBodyTokenStream);
+            getNextToken(elseBodyTokenStream);
         }
 
         elseBodyTokenStream.add(new Token(TokenType.EOF, null, null));
@@ -113,11 +113,11 @@ public class ExpressionParser {
     private WhileExpression parseWhileExpression() {
         List<Token> predicateTokenStream = new ArrayList<>();
 
-        getNextElement(predicateTokenStream);
-        getNextElement(predicateTokenStream);
-        getNextElement(predicateTokenStream);
+        getNextToken(predicateTokenStream);
+        getNextToken(predicateTokenStream);
+        getNextToken(predicateTokenStream);
 
-        if (getNextElement().getTokenType() != TokenType.THEN_WHILE) {
+        if (getNextToken().getTokenType() != TokenType.THEN_WHILE) {
             throw new IllegalArgumentException();
         }
 
@@ -126,7 +126,7 @@ public class ExpressionParser {
         List<Token> bodyTokenStream = new ArrayList<>();
 
         while (peekNextElement().getTokenType() != TokenType.END_WHILE) {
-            getNextElement(bodyTokenStream);
+            getNextToken(bodyTokenStream);
         }
 
         bodyTokenStream.add(new Token(TokenType.EOF, null, null));
@@ -146,17 +146,17 @@ public class ExpressionParser {
 
     public Expression getNextExpression() {
         List<Token> tokenStream = new ArrayList<>();
-        Token nextElement = getNextElement(tokenStream);
+        Token firstToken = getNextToken(tokenStream);
 
-        if (nextElement.getTokenType() == TokenType.VARIABLE) {
+        if (firstToken.getTokenType() == TokenType.VARIABLE) {
             if (peekNextElement().getTokenType() != TokenType.SET) {
                 return new PrintExpression(tokenStream.get(0));
             } else {
                 return parseSetExpression(tokenStream);
             }
-        } else if (nextElement.getTokenType() == TokenType.IF) {
+        } else if (firstToken.getTokenType() == TokenType.IF) {
             return parseIfExpression();
-        } else if (nextElement.getTokenType() == TokenType.WHILE) {
+        } else if (firstToken.getTokenType() == TokenType.WHILE) {
             return parseWhileExpression();
         }
 
