@@ -110,6 +110,40 @@ public class ExpressionParser {
         return new IfExpression(predicateExpression, ifBody, elseBody);
     }
 
+    private WhileExpression parseWhileExpression() {
+        List<Token> predicateTokenStream = new ArrayList<>();
+
+        getNextElement(predicateTokenStream);
+        getNextElement(predicateTokenStream);
+        getNextElement(predicateTokenStream);
+
+        if (getNextElement().getTokenType() != TokenType.THEN_WHILE) {
+            throw new IllegalArgumentException();
+        }
+
+        PredicateExpression predicateExpression = new PredicateExpression(predicateTokenStream);
+
+        List<Token> bodyTokenStream = new ArrayList<>();
+
+        while (peekNextElement().getTokenType() != TokenType.END_WHILE) {
+            getNextElement(bodyTokenStream);
+        }
+
+        bodyTokenStream.add(new Token(TokenType.EOF, null, null));
+
+        ExpressionParser bodyParser = new ExpressionParser(bodyTokenStream);
+
+        List<Expression> body = new ArrayList<>();
+
+        while(bodyParser.hasNext()) {
+            body.add(bodyParser.getNextExpression());
+        }
+
+        skipElement();
+
+        return new WhileExpression(predicateExpression, body);
+    }
+
     public Expression getNextExpression() {
         List<Token> tokenStream = new ArrayList<>();
         Token nextElement = getNextElement(tokenStream);
@@ -123,37 +157,7 @@ public class ExpressionParser {
         } else if (nextElement.getTokenType() == TokenType.IF) {
             return parseIfExpression();
         } else if (nextElement.getTokenType() == TokenType.WHILE) {
-            List<Token> predicateTokenStream = new ArrayList<>();
-
-            getNextElement(predicateTokenStream);
-            getNextElement(predicateTokenStream);
-            getNextElement(predicateTokenStream);
-
-            if (getNextElement(tokenStream).getTokenType() != TokenType.THEN_WHILE) {
-                throw new IllegalArgumentException();
-            }
-
-            PredicateExpression predicateExpression = new PredicateExpression(predicateTokenStream);
-
-            List<Token> bodyTokenStream = new ArrayList<>();
-
-            while (peekNextElement().getTokenType() != TokenType.END_WHILE) {
-                getNextElement(bodyTokenStream);
-            }
-
-            bodyTokenStream.add(new Token(TokenType.EOF, null, null));
-
-            ExpressionParser bodyParser = new ExpressionParser(bodyTokenStream);
-
-            List<Expression> body = new ArrayList<>();
-
-            while(bodyParser.hasNext()) {
-                body.add(bodyParser.getNextExpression());
-            }
-
-            skipElement();
-
-            return new WhileExpression(predicateExpression, body);
+            return parseWhileExpression();
         }
 
         throw new IllegalArgumentException();
