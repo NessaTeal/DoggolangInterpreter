@@ -67,39 +67,11 @@ public class ExpressionParser {
             throw new IllegalArgumentException();
         }
 
-        List<Token> ifBodyTokenStream = new ArrayList<>();
-
-        while (peekNextElement().getTokenType() != TokenType.ELSE) {
-            getNextToken(ifBodyTokenStream);
-        }
-
-        ifBodyTokenStream.add(new Token(TokenType.EOF, null, null));
-
-        ExpressionParser ifBodyParser = new ExpressionParser(ifBodyTokenStream);
-
-        List<Expression> ifBody = new ArrayList<>();
-
-        while(ifBodyParser.hasNext()) {
-            ifBody.add(ifBodyParser.getNextExpression());
-        }
+        List<Expression> ifBody = parseExpressionsUntil(TokenType.ELSE);
 
         skipElement();
 
-        List<Token> elseBodyTokenStream = new ArrayList<>();
-
-        while (peekNextElement().getTokenType() != TokenType.END_IF) {
-            getNextToken(elseBodyTokenStream);
-        }
-
-        elseBodyTokenStream.add(new Token(TokenType.EOF, null, null));
-
-        ExpressionParser elseBodyParser = new ExpressionParser(elseBodyTokenStream);
-
-        List<Expression> elseBody = new ArrayList<>();
-
-        while(elseBodyParser.hasNext()) {
-            elseBody.add(elseBodyParser.getNextExpression());
-        }
+        List<Expression> elseBody = parseExpressionsUntil(TokenType.END_IF);
 
         skipElement();
 
@@ -112,25 +84,11 @@ public class ExpressionParser {
             throw new IllegalArgumentException();
         }
 
-        List<Token> bodyTokenStream = new ArrayList<>();
-
-        while (peekNextElement().getTokenType() != TokenType.END_WHILE) {
-            getNextToken(bodyTokenStream);
-        }
-
-        bodyTokenStream.add(new Token(TokenType.EOF, null, null));
-
-        ExpressionParser bodyParser = new ExpressionParser(bodyTokenStream);
-
-        List<Expression> body = new ArrayList<>();
-
-        while(bodyParser.hasNext()) {
-            body.add(bodyParser.getNextExpression());
-        }
+        List<Expression> expressions = parseExpressionsUntil(TokenType.END_WHILE);
 
         skipElement();
 
-        return new WhileExpression(predicateExpression, body);
+        return new WhileExpression(predicateExpression, expressions);
     }
 
     private PredicateExpression parsePredicateExpression() {
@@ -141,6 +99,21 @@ public class ExpressionParser {
         getNextToken(predicateExpressionTokens);
 
         return new PredicateExpression(predicateExpressionTokens);
+    }
+
+    private List<Expression> parseExpressionsUntil(TokenType tokenType) {
+        List<Token> expressionsTokens = new ArrayList<>();
+        while (peekNextElement().getTokenType() != tokenType) {
+            getNextToken(expressionsTokens);
+        }
+        expressionsTokens.add(new Token(TokenType.EOF, null, null));
+
+        ExpressionParser expressionsParser = new ExpressionParser(expressionsTokens);
+        List<Expression> expressions = new ArrayList<>();
+        while(expressionsParser.hasNext()) {
+            expressions.add(expressionsParser.getNextExpression());
+        }
+        return expressions;
     }
 
     public Expression getNextExpression() {
