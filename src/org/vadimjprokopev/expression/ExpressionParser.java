@@ -40,21 +40,24 @@ public class ExpressionParser {
         return tokens.get(currentPosition).getTokenType() != TokenType.EOF;
     }
 
-    private SetExpression parseSetExpression(List<Token> tokenStream) {
-        getNextToken(tokenStream);
-        getNextToken(tokenStream);
+    private SetExpression parseSetExpression(Token settedVariable) {
+        List<Token> setExpressionTokens = new ArrayList<>();
+        setExpressionTokens.add(settedVariable);
+
+        getNextToken(setExpressionTokens);
+        getNextToken(setExpressionTokens);
 
         if (peekNextElement().getTokenType() == TokenType.ADD
                 || peekNextElement().getTokenType() == TokenType.SUBTRACT
                 || peekNextElement().getTokenType() == TokenType.MULTIPLY) {
-            getNextToken(tokenStream);
-            getNextToken(tokenStream);
+            getNextToken(setExpressionTokens);
+            getNextToken(setExpressionTokens);
 
-            ArithmeticExpression arithmeticExpression = new ArithmeticExpression(tokenStream.subList(2, 5));
-            return new SetExpression(tokenStream.get(0), arithmeticExpression);
+            ArithmeticExpression arithmeticExpression = new ArithmeticExpression(setExpressionTokens.subList(2, 5));
+            return new SetExpression(setExpressionTokens.get(0), arithmeticExpression);
         } else {
-            ConstantExpression constantExpression = new ConstantExpression(tokenStream.get(2));
-            return new SetExpression(tokenStream.get(0), constantExpression);
+            ConstantExpression constantExpression = new ConstantExpression(setExpressionTokens.get(2));
+            return new SetExpression(setExpressionTokens.get(0), constantExpression);
         }
     }
 
@@ -145,14 +148,13 @@ public class ExpressionParser {
     }
 
     public Expression getNextExpression() {
-        List<Token> tokenStream = new ArrayList<>();
-        Token firstToken = getNextToken(tokenStream);
+        Token firstToken = getNextToken();
 
         if (firstToken.getTokenType() == TokenType.VARIABLE) {
             if (peekNextElement().getTokenType() != TokenType.SET) {
-                return new PrintExpression(tokenStream.get(0));
+                return new PrintExpression(firstToken);
             } else {
-                return parseSetExpression(tokenStream);
+                return parseSetExpression(firstToken);
             }
         } else if (firstToken.getTokenType() == TokenType.IF) {
             return parseIfExpression();
