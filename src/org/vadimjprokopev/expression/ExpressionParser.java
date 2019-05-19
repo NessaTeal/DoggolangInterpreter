@@ -15,13 +15,6 @@ public class ExpressionParser {
         this.tokens = tokens;
     }
 
-    private Token getNextToken(List<Token> body) {
-        Token element = tokens.get(currentPosition);
-        body.add(element);
-        currentPosition++;
-        return element;
-    }
-
     private Token getNextToken() {
         Token element = tokens.get(currentPosition);
         currentPosition++;
@@ -43,15 +36,14 @@ public class ExpressionParser {
     private SetExpression parseSetExpression(Token settedVariable) {
         List<Token> setExpressionTokens = new ArrayList<>();
         setExpressionTokens.add(settedVariable);
-
-        getNextToken(setExpressionTokens);
-        getNextToken(setExpressionTokens);
+        setExpressionTokens.add(getNextToken());
+        setExpressionTokens.add(getNextToken());
 
         if (peekNextElement().getTokenType() == TokenType.ADD
                 || peekNextElement().getTokenType() == TokenType.SUBTRACT
                 || peekNextElement().getTokenType() == TokenType.MULTIPLY) {
-            getNextToken(setExpressionTokens);
-            getNextToken(setExpressionTokens);
+            setExpressionTokens.add(getNextToken());
+            setExpressionTokens.add(getNextToken());
 
             ArithmeticExpression arithmeticExpression = new ArithmeticExpression(setExpressionTokens.subList(2, 5));
             return new SetExpression(setExpressionTokens.get(0), arithmeticExpression);
@@ -93,18 +85,16 @@ public class ExpressionParser {
 
     private PredicateExpression parsePredicateExpression() {
         List<Token> predicateExpressionTokens = new ArrayList<>();
-
-        getNextToken(predicateExpressionTokens);
-        getNextToken(predicateExpressionTokens);
-        getNextToken(predicateExpressionTokens);
-
+        predicateExpressionTokens.add(getNextToken());
+        predicateExpressionTokens.add(getNextToken());
+        predicateExpressionTokens.add(getNextToken());
         return new PredicateExpression(predicateExpressionTokens);
     }
 
     private List<Expression> parseExpressionsUntil(TokenType tokenType) {
         List<Token> expressionsTokens = new ArrayList<>();
         while (peekNextElement().getTokenType() != tokenType) {
-            getNextToken(expressionsTokens);
+            expressionsTokens.add(getNextToken());
         }
         expressionsTokens.add(new Token(TokenType.EOF, null, null));
 
