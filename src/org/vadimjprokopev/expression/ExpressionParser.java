@@ -34,6 +34,24 @@ public class ExpressionParser {
         return tokens.get(currentPosition).getTokenType() != TokenType.EOF;
     }
 
+    private SetExpression parseSetExpression(List<Token> tokenStream) {
+        getNextElement(tokenStream);
+        getNextElement(tokenStream);
+
+        if (peekNextElement().getTokenType() == TokenType.ADD
+                || peekNextElement().getTokenType() == TokenType.SUBTRACT
+                || peekNextElement().getTokenType() == TokenType.MULTIPLY) {
+            getNextElement(tokenStream);
+            getNextElement(tokenStream);
+
+            ArithmeticExpression arithmeticExpression = new ArithmeticExpression(tokenStream.subList(2, 5));
+            return new SetExpression(tokenStream.get(0), arithmeticExpression);
+        } else {
+            ConstantExpression constantExpression = new ConstantExpression(tokenStream.get(2));
+            return new SetExpression(tokenStream.get(0), constantExpression);
+        }
+    }
+
     public Expression getNextExpression() {
         List<Token> tokenStream = new ArrayList<>();
         Token nextElement = getNextElement(tokenStream);
@@ -42,21 +60,7 @@ public class ExpressionParser {
             if (peekNextElement().getTokenType() != TokenType.SET) {
                 return new PrintExpression(tokenStream.get(0));
             } else {
-                getNextElement(tokenStream);
-                getNextElement(tokenStream);
-
-                if (peekNextElement().getTokenType() == TokenType.ADD
-                        || peekNextElement().getTokenType() == TokenType.SUBTRACT
-                        || peekNextElement().getTokenType() == TokenType.MULTIPLY) {
-                    getNextElement(tokenStream);
-                    getNextElement(tokenStream);
-
-                    ArithmeticExpression arithmeticExpression = new ArithmeticExpression(tokenStream.subList(2, 5));
-                    return new SetExpression(tokenStream.get(0), arithmeticExpression);
-                } else {
-                    ConstantExpression constantExpression = new ConstantExpression(tokenStream.get(2));
-                    return new SetExpression(tokenStream.get(0), constantExpression);
-                }
+                return parseSetExpression(tokenStream);
             }
         } else if (nextElement.getTokenType() == TokenType.IF) {
             List<Token> predicateTokenStream = new ArrayList<>();
